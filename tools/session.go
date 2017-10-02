@@ -6,23 +6,15 @@ import (
 	"errors"
 )
 
-type SessionConf struct {
-	Hosts    []string
-	Database string
-}
+type SessionConf mgo.DialInfo
 
 var (
 	session *mgo.Session
 )
 
-func InitSession(conf SessionConf) *mgo.Session {
+func InitSession(conf *SessionConf) *mgo.Session {
 	var err error
-	dialInfo := mgo.DialInfo{
-		Addrs:    conf.Hosts,
-		Database: conf.Database,
-	}
-
-	session, err = mgo.DialWithInfo(&dialInfo)
+	session, err = mgo.DialWithInfo((*mgo.DialInfo)(conf))
 
 	if err != nil {
 		panic(fmt.Sprintf("Failed to connect to DB server. %s", err))
