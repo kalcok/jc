@@ -1,3 +1,5 @@
+# 3rd party vendor sources
+vendor/
 # Binaries for programs and plugins
 *.exe
 *.dll
