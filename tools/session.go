@@ -6,13 +6,22 @@ import (
 	"errors"
 )
 
+type SessionConf struct {
+	Hosts    []string
+	Database string
+}
+
 var (
 	session *mgo.Session
 )
 
-func InitSession() *mgo.Session {
+func InitSession(conf SessionConf) *mgo.Session {
 	var err error
-	dialInfo := mgo.DialInfo{Addrs: []string{"localhost"}, Database: "jc_test"}
+	dialInfo := mgo.DialInfo{
+		Addrs:    conf.Hosts,
+		Database: conf.Database,
+	}
+
 	session, err = mgo.DialWithInfo(&dialInfo)
 
 	if err != nil {
