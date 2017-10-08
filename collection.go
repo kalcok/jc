@@ -89,8 +89,6 @@ func (c *Collection) Init(parent reflect.Value, parentType reflect.Type) {
 
 	c._parent = parent
 	c._parentType = parentType
-	fmt.Println(c._parent)
-	fmt.Println(c._parentType)
 	documentIdFound := false
 	for i := 0; i < reflect.Indirect(c._parent).NumField(); i++ {
 		field := c._parentType.Field(i)
