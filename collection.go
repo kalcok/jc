@@ -59,6 +59,7 @@ func (c *Collection) Save(reuseSocket bool) (info *mgo.ChangeInfo, err error) {
 	var session *mgo.Session
 	master_session, err := tools.GetSession()
 	var documentID interface{}
+	idField := "_id"
 
 	if err != nil {
 		return info, err
@@ -71,6 +72,7 @@ func (c *Collection) Save(reuseSocket bool) (info *mgo.ChangeInfo, err error) {
 	}
 
 	if len(c._explicitID) > 0 {
+		idField = c._explicitID
 		documentID = c._parent.Elem().FieldByName(c._explicitID).Interface()
 	} else if len(c._implicitID) > 0 {
 		documentID = c._implicitID
@@ -80,7 +82,7 @@ func (c *Collection) Save(reuseSocket bool) (info *mgo.ChangeInfo, err error) {
 	}
 
 	collection := session.DB(c._collectionDB).C(c._collectionName)
-	info, err = collection.UpsertId(documentID, c._parent.Interface())
+	info, err = collection.Upsert(bson.M{idField: documentID}, c._parent.Interface())
 
 	return info, err
 }
@@ -89,9 +91,6 @@ func (c *Collection) Init(parent reflect.Value, parentType reflect.Type) {
 
 	c._parent = parent
 	c._parentType = parentType
-	fmt.Println(c._parent)
-	fmt.Println(c._parentType)
-	documentIdFound := false
 	for i := 0; i < reflect.Indirect(c._parent).NumField(); i++ {
 		field := c._parentType.Field(i)
 
@@ -118,7 +117,6 @@ func (c *Collection) Init(parent reflect.Value, parentType reflect.Type) {
 			switch field_id[0] {
 			case "_id":
 				c._explicitID = field.Name
-				documentIdFound = true
 				break
 			case "-":
 				continue
@@ -127,9 +125,6 @@ func (c *Collection) Init(parent reflect.Value, parentType reflect.Type) {
 			}
 		}
 		c._skeleton = append(c._skeleton, field)
-	}
-	if !documentIdFound {
-		c._explicitID = "_id"
 	}
 
 }
