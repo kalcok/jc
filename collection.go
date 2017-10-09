@@ -16,6 +16,7 @@ type document interface {
 	CollectionName() string
 	SetDatabase(string)
 	Database() string
+	ID() interface{}
 	Init(reflect.Value, reflect.Type)
 	InitDB() error
 	Info()
@@ -86,6 +87,15 @@ func (c *Collection) Save(reuseSocket bool) (info *mgo.ChangeInfo, err error) {
 	info, err = collection.Upsert(bson.M{idField: documentID}, c._parent.Interface())
 
 	return info, err
+}
+
+func (c *Collection) ID() (id interface{}) {
+	if c._hasExplicitID {
+		id = c._parent.Elem().FieldByName(c._explicitIDField).Interface()
+	} else {
+		id = c._implicitIDValue
+	}
+	return id
 }
 
 func (c *Collection) Init(parent reflect.Value, parentType reflect.Type) {
