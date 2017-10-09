@@ -16,6 +16,7 @@ type document interface {
 	CollectionName() string
 	SetDatabase(string)
 	Database() string
+	GetField(string) (interface{}, error)
 	ID() interface{}
 	Init(reflect.Value, reflect.Type)
 	InitDB() error
@@ -96,6 +97,15 @@ func (c *Collection) ID() (id interface{}) {
 		id = c._implicitIDValue
 	}
 	return id
+}
+
+func (c *Collection) GetField(name string) (result interface{}, err error) {
+	if unicode.IsLower(rune(name[0])) {
+		err = errors.New(fmt.Sprintf("can't access unexported field '%s'", name))
+		return
+	}
+	result = c._parent.Elem().FieldByName(name).Interface()
+	return
 }
 
 func (c *Collection) Init(parent reflect.Value, parentType reflect.Type) {
