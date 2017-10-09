@@ -119,11 +119,11 @@ func (c *Collection) Init(parent reflect.Value, parentType reflect.Type) {
 		// Find explicit Collection name
 		if field.Type == reflect.TypeOf(Collection{}) {
 			explicitName := false
-			odm_tag, tag_present := field.Tag.Lookup("odm")
+			jc_tag, tag_present := field.Tag.Lookup("jc")
 			if tag_present {
-				odm_fields := strings.Split(odm_tag, ",")
-				if len(odm_fields) > 0 && odm_fields[0] != "" {
-					c.setCollection(odm_fields[0])
+				jc_fields := strings.Split(jc_tag, ",")
+				if len(jc_fields) > 0 && jc_fields[0] != "" {
+					c.setCollection(jc_fields[0])
 					explicitName = true
 				}
 			}
