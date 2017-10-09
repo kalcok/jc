@@ -23,13 +23,14 @@ type document interface {
 }
 
 type Collection struct {
-	_collectionName string                `bson:"-"json:"-"`
-	_collectionDB   string                `bson:"-"json:"-"`
-	_parent         reflect.Value         `bson:"-"json:"-"`
-	_parentType     reflect.Type          `bson:"-"json:"-"`
-	_explicitID     string                `bson:"-"json:"-"`
-	_implicitID     bson.ObjectId         `bson:"-"json:"-"`
-	_skeleton       []reflect.StructField `bson:"-"json:"-"`
+	_collectionName  string                `bson:"-"json:"-"`
+	_collectionDB    string                `bson:"-"json:"-"`
+	_parent          reflect.Value         `bson:"-"json:"-"`
+	_parentType      reflect.Type          `bson:"-"json:"-"`
+	_hasExplicitID   bool                  `bson:"-"json:"-"`
+	_explicitIDField string                `bson:"-"json:"-"`
+	_implicitIDValue bson.ObjectId         `bson:"-"json:"-"`
+	_skeleton        []reflect.StructField `bson:"-"json:"-"`
 }
 
 func (c *Collection) setCollection(name string) {
@@ -71,14 +72,14 @@ func (c *Collection) Save(reuseSocket bool) (info *mgo.ChangeInfo, err error) {
 		session = master_session.Copy()
 	}
 
-	if len(c._explicitID) > 0 {
-		idField = c._explicitID
-		documentID = c._parent.Elem().FieldByName(c._explicitID).Interface()
-	} else if len(c._implicitID) > 0 {
-		documentID = c._implicitID
+	if c._hasExplicitID {
+		idField = c._explicitIDField
+		documentID = c._parent.Elem().FieldByName(c._explicitIDField).Interface()
+	} else if len(c._implicitIDValue) > 0 {
+		documentID = c._implicitIDValue
 	} else {
-		c._implicitID = bson.NewObjectId()
-		documentID = c._implicitID
+		c._implicitIDValue = bson.NewObjectId()
+		documentID = c._implicitIDValue
 	}
 
 	collection := session.DB(c._collectionDB).C(c._collectionName)
@@ -91,6 +92,7 @@ func (c *Collection) Init(parent reflect.Value, parentType reflect.Type) {
 
 	c._parent = parent
 	c._parentType = parentType
+	c._hasExplicitID = false
 	for i := 0; i < reflect.Indirect(c._parent).NumField(); i++ {
 		field := c._parentType.Field(i)
 
@@ -116,7 +118,8 @@ func (c *Collection) Init(parent reflect.Value, parentType reflect.Type) {
 			field_id := strings.Split(bson_tag, ",")
 			switch field_id[0] {
 			case "_id":
-				c._explicitID = field.Name
+				c._explicitIDField = field.Name
+				c._hasExplicitID = true
 				break
 			case "-":
 				continue
