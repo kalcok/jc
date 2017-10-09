@@ -47,6 +47,62 @@ func TestSingleDocumentInit(t *testing.T) {
 	}
 }
 
+func TestImplicitCollectionName(t *testing.T) {
+	err_message := "Failed to implicitly create collection name. Expected '%s', got '%s'"
+
+	type camelCased ImplicitID
+	cc_string := "camel_cased"
+
+	type TrueCamelCased ImplicitID
+	tcc_string := "true_camel_cased"
+
+	type snake_cased ImplicitID
+	sc_string := "snake_cased"
+
+	type plain ImplicitID
+	plain_string := "plain"
+
+	cc := camelCased{Data: "camelCased"}
+	jc.NewDocument(&cc)
+	if cc.CollectionName() != cc_string {
+		t.Error(err_message, cc_string, cc.CollectionName())
+	}
+
+	tcc := TrueCamelCased{Data: "TrueCamelCased"}
+	jc.NewDocument(&tcc)
+	if tcc.CollectionName() != tcc_string {
+		t.Error(err_message, tcc_string, tcc.CollectionName())
+	}
+
+	sc := snake_cased{Data: "snakce_cased"}
+	jc.NewDocument(&sc)
+	if sc.CollectionName() != sc_string {
+		t.Error(err_message, sc_string, sc.CollectionName())
+	}
+
+	p := plain{Data: "plain"}
+	jc.NewDocument(&p)
+	if p.CollectionName() != plain_string {
+		t.Error(err_message, plain_string, p.CollectionName())
+	}
+}
+
+func TestExplicitCollectionName(t *testing.T) {
+	err_msg := "Failed to set explicit Collection name. Expected '%s', got '%s'"
+	type boringStruct struct {
+		jc.Collection `bson:"-"json:"-"jc:"my_awesome_collection"`
+		Data string   `bson:"data",json:"data"`
+	}
+
+	doc := boringStruct{Data: "Boring data"}
+	jc.NewDocument(&doc)
+
+	if doc.CollectionName() != "my_awesome_collection" {
+		t.Error(err_msg, "my_awesome_collection", doc.CollectionName())
+	}
+
+}
+
 func TestInsertExplicitIDCollection(t *testing.T) {
 	doc := ExplicitID{Data: "TestInsertExplicitIDCollection", MyID: 666}
 	err := jc.NewDocument(&doc)
