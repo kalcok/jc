@@ -104,7 +104,13 @@ func (c *Collection) GetField(name string) (result interface{}, err error) {
 		err = errors.New(fmt.Sprintf("can't access unexported field '%s'", name))
 		return
 	}
-	result = c._parent.Elem().FieldByName(name).Interface()
+	missingValue := reflect.Value{}
+	resultValue := c._parent.Elem().FieldByName(name)
+	if resultValue == missingValue {
+		err = errors.New(fmt.Sprintf("field '%s' not found", name))
+		return
+	}
+	result = resultValue.Interface()
 	return
 }
 
