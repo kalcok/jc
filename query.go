@@ -10,7 +10,7 @@ import (
 
 type Query struct {
 	Database    string
-	Collection  string
+	collection  string
 	filter      interface{}
 	limit       int
 	skip        int
@@ -42,7 +42,7 @@ func NewQuery(result interface{}) (newQuery Query, err error) {
 	newQuery.resultType = internalType
 	proto_val := initPrototype(prototype, internalType)
 
-	newQuery.Collection = proto_val.FieldByName("_collectionName").String()
+	newQuery.collection = proto_val.FieldByName("_collectionName").String()
 	newQuery.Database = proto_val.FieldByName("_collectionDB").String()
 
 	return
@@ -61,8 +61,7 @@ func (q *Query) Execute(reuseSocket bool) (err error) {
 	} else {
 		session = masterSession.Copy()
 	}
-	fmt.Println(q.Collection)
-	query := session.DB(q.Database).C(q.Collection).Find(q.filter)
+	query := session.DB(q.Database).C(q.collection).Find(q.filter)
 
 	if q.skip > 0 {
 		query = query.Skip(q.skip)
@@ -77,8 +76,8 @@ func (q *Query) Execute(reuseSocket bool) (err error) {
 	} else {
 		err = query.All(q.result)
 	}
+
 	if err != nil {
-		fmt.Println(err)
 		return
 	}
 	q.initResult()
