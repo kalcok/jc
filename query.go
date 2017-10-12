@@ -84,6 +84,10 @@ func (q *Query) Execute(reuseSocket bool) (err error) {
 	return
 }
 
+func (q *Query) Collection() string {
+	return q.collection
+}
+
 func (q *Query) Filter(filter interface{}) *Query {
 	q.filter = filter
 	return q
