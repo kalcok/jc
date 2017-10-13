@@ -206,7 +206,7 @@ func TestQuerySkip(t *testing.T) {
 }
 
 func TestQueryFilter(t *testing.T) {
-	expectedData := "This is waht we want"
+	expectedData := "This is what we want"
 	prepareSimpleRecords(3, "Not what We want")
 
 	expected := ImplicitID{Data: expectedData}
@@ -220,6 +220,26 @@ func TestQueryFilter(t *testing.T) {
 	q.Filter(bson.M{"data": expectedData}).Execute(true)
 
 	if result.Data != expectedData {
-		t.Error("Failed to select records based on selected filter")
+		t.Error("Failed to select records based on bson filter")
+	}
+}
+
+func TestQueryFilterStruct(t *testing.T) {
+	dropTestDB()
+	expectedData := "This is what we want"
+	prepareSimpleRecords(3, "Not what we want")
+	expected := ImplicitID{Data: expectedData}
+	jc.NewDocument(&expected)
+
+	expected.Save(true)
+
+	result := ImplicitID{}
+
+	q, _ := jc.NewQuery(&result)
+
+	q.Filter(ImplicitID{Data: expectedData}).Execute(true)
+
+	if result.Data != expectedData {
+		t.Error("Failed to select records based on struct filter")
 	}
 }
