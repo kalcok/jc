@@ -4,6 +4,7 @@ import (
 	"testing"
 	"github.com/kalcok/jc"
 	"fmt"
+	"gopkg.in/mgo.v2/bson"
 )
 
 // Creates <num> of records of ImplicitID type
@@ -165,5 +166,60 @@ func TestQuerySliceResetOnMultipleSelects(t *testing.T) {
 
 	if len(docs) != secondBatch {
 		t.Error("Failed to clean up target slice between multiple selects")
+	}
+}
+
+func TestQueryLimit(t *testing.T) {
+	limit := 5
+	prepareSimpleRecords(10, "TestQueryLimit")
+	docs := []ImplicitID{}
+
+	q, _ := jc.NewQuery(&docs)
+	q.Limit(limit).Execute(true)
+
+	if len(docs) != limit {
+		t.Error("Failed to impose query limit")
+	}
+}
+
+func TestQuerySkip(t *testing.T) {
+	dropTestDB()
+	skip := 1
+
+	sample := ExplicitID{MyID: 1, Data: "TestQuery"}
+	jc.NewDocument(&sample)
+	sample.Save(true)
+	sample.MyID = 2
+	sample.Save(true)
+	sample.MyID = 3
+	sample.Save(true)
+
+	result := []ExplicitID{}
+	q, _ := jc.NewQuery(&result)
+	q.Skip(skip).Execute(true)
+
+	for _, record := range result {
+		if record.MyID == 1 {
+			t.Error("Failed to skip over entries in DB")
+		}
+	}
+}
+
+func TestQueryFilter(t *testing.T) {
+	expectedData := "This is waht we want"
+	prepareSimpleRecords(3, "Not what We want")
+
+	expected := ImplicitID{Data: expectedData}
+	jc.NewDocument(&expected)
+
+	expected.Save(true)
+
+	result := ImplicitID{}
+	q, _ := jc.NewQuery(&result)
+
+	q.Filter(bson.M{"data": expectedData}).Execute(true)
+
+	if result.Data != expectedData {
+		t.Error("Failed to select records based on selected filter")
 	}
 }
