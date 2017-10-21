@@ -57,7 +57,22 @@ type NewYorkBranchEmployee struct {
 }
 ```
 
-### Saving model
-\# TODO
+### Document Initiation
+Due to some Golang restrictions (mainly, missing constructors) new document instance must be initiated with call to `NewDocument()` which takes pointer to a struct that contains `jc.Collection` as an argument
+
+**Example**
+```golang
+newPerson := Person{FirstName:"John", LastName:"Foo"}
+err := jc.NewDocument(&newPerson)
+
+if err != nil {
+	panic(err)
+}
+```
+### Inserting Document (Save)
+Once document is properly initialized, it can be inserted into DB by calling Save() method.
+
+\#TODO
+
 ### Query
 \# TODO
