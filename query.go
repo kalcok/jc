@@ -50,17 +50,17 @@ func NewQuery(result interface{}) (newQuery Query, err error) {
 
 func (q *Query) Execute(reuseSocket bool) (err error) {
 	var session *mgo.Session
-	masterSession, err := tools.GetSession()
 
+	if reuseSocket {
+		session, err = tools.GetSessionClone()
+	} else {
+		session, err = tools.GetSessionCopy()
+	}
 	if err != nil {
 		return
 	}
+	defer session.Close()
 
-	if reuseSocket {
-		session = masterSession.Clone()
-	} else {
-		session = masterSession.Copy()
-	}
 	query := session.DB(q.Database).C(q.collection).Find(q.filter)
 
 	if q.skip > 0 {

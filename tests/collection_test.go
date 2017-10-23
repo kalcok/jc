@@ -33,11 +33,12 @@ func initTestSession() {
 }
 
 func dropTestDB() {
-	session, err := tools.GetSession()
+	session, err := tools.GetSessionClone()
 	if err != nil {
 		panic(err)
 	}
 	session.DB("").DropDatabase()
+	session.Close()
 }
 
 func TestMain(m *testing.M) {
@@ -134,7 +135,7 @@ func TestGetFieldProtectUnexported(t *testing.T) {
 		private string
 	}
 
-	doc := ImplicitID{Data: "TestGetFieldProtectUnexported"}
+	doc := unexportedFieldDoc{Data: "TestGetFieldProtectUnexported", private: "Unexported"}
 	jc.NewDocument(&doc)
 	_, err := doc.GetField("private")
 	if err == nil {
@@ -188,7 +189,8 @@ func TestInsertExplicitIDCollection(t *testing.T) {
 	// Test if document is in DB
 	result := bson.M{}
 	empty_result := bson.M{}
-	session, _ := tools.GetSession()
+	session, _ := tools.GetSessionClone()
+	defer session.Close()
 	session.DB(sessionDB).C("explicit_i_d").FindId(id).One(&result)
 	if reflect.DeepEqual(result, empty_result) {
 		t.Error("Failed to insert document with explicit ID into DB")
@@ -213,7 +215,8 @@ func TestInsertImplicitIDCollection(t *testing.T) {
 	// Test if document is in DB
 	result := bson.M{}
 	empty_result := bson.M{}
-	session, _ := tools.GetSession()
+	session, _ := tools.GetSessionClone()
+	defer session.Close()
 	session.DB(sessionDB).C("implicit_i_d").FindId(id).One(&result)
 	if reflect.DeepEqual(result, empty_result) {
 		t.Error("Failed to insert document with implicit ID into DB")
@@ -233,7 +236,8 @@ func TestUpsert(t *testing.T) {
 	doc.Save(true)
 
 	result := bson.M{}
-	session, _ := tools.GetSession()
+	session, _ := tools.GetSessionClone()
+	defer session.Close()
 	session.DB(sessionDB).C("implicit_i_d").FindId(id).One(&result)
 
 	if result["data"] != update {

@@ -60,19 +60,18 @@ func (c *Collection) Info() {
 
 func (c *Collection) Save(reuseSocket bool) (info *mgo.ChangeInfo, err error) {
 	var session *mgo.Session
-	master_session, err := tools.GetSession()
 	var documentID interface{}
 	idField := "_id"
 
+	if reuseSocket {
+		session, err = tools.GetSessionClone()
+	} else {
+		session, err = tools.GetSessionCopy()
+	}
 	if err != nil {
 		return info, err
 	}
-
-	if reuseSocket {
-		session = master_session.Clone()
-	} else {
-		session = master_session.Copy()
-	}
+	defer session.Close()
 
 	if c._hasExplicitID {
 		idField = c._explicitIDField
@@ -159,9 +158,10 @@ func (c *Collection) Init(parent reflect.Value, parentType reflect.Type) {
 }
 
 func (c *Collection) InitDB() error {
-	session, err := tools.GetSession()
+	session, err := tools.GetSessionClone()
 	if err == nil {
 		c.SetDatabase(session.DB("").Name)
+		defer session.Close()
 	} else {
 		err = errors.New("database not initialized")
 	}
