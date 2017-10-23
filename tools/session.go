@@ -22,10 +22,24 @@ func InitSession(conf *SessionConf) *mgo.Session {
 	return session
 }
 
-func GetSession() (*mgo.Session, error) {
+func CloseSession() {
+	if session != nil {
+		session.Close()
+	}
+}
+
+func GetSessionCopy() (*mgo.Session, error) {
 	var err error
 	if session == nil {
 		err = errors.New("Session is not initialized")
 	}
-	return session, err
+	return session.Copy(), err
+}
+
+func GetSessionClone() (*mgo.Session, error) {
+	var err error
+	if session == nil {
+		err = errors.New("Session is not initialized")
+	}
+	return session.Clone(), err
 }
