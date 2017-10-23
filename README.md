@@ -56,7 +56,22 @@ type NewYorkBranchEmployee struct {
 	LastName  string
 }
 ```
+### Session Management
+Before using any `jc` features, there needs to be initialized session with MongoDB server. Master session is initialized by calling `jc.tools.InitSession()` which takes one argument in form of `jc.toosl.SessionConf` struct. `Sessionconf` is just convenient alias to `mgo.DialInfo`. After you don't need master session anymore, it can be closed with call to `jc.tools.CloseSession()`.
 
+**Eample**
+```golang
+func main(){
+	conf := tools.SessionConf{Addrs: []string{"localhost"}, Database: "jc_test"}
+	tools.InitSession(&conf)
+	defer tools.CloseSession()
+	// program logic
+	// ...
+}
+```
+You usually don't need to be concerned with session for the rest of your program after initialization. However if you need direct access to `mgo.Session` object, you can get either clone or copy of master session by calling `jc.tools.GetSessionClone()` or `jc.tools.GetSessionCopy()` respectivelly. Don't forget that these session need to be closed separately by calling `mySession.Close()`
+_______________________________________________________________
+Note: `tools` package is ripe for renaming
 ### Document Initiation
 Due to some Golang restrictions (mainly, missing constructors) new document instance must be initiated with call to `NewDocument()` which takes pointer to a struct that contains `jc.Collection` as an argument
 
@@ -72,7 +87,15 @@ if err != nil {
 ### Inserting Document (Save)
 Once document is properly initialized, it can be inserted into DB by calling Save() method.
 
-\#TODO
+**Example**
+```golang
+changeInfo, err := newPerson.Save(true)
+
+if err != nil {
+	panic(err)
+}
+```
+\# TODO
 
 ### Query
 \# TODO
