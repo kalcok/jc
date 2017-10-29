@@ -12,14 +12,13 @@ var (
 	session *mgo.Session
 )
 
-func InitSession(conf *SessionConf) *mgo.Session {
+func InitSession(conf *SessionConf) {
 	var err error
 	session, err = mgo.DialWithInfo((*mgo.DialInfo)(conf))
 
 	if err != nil {
 		panic(fmt.Sprintf("Failed to connect to DB server. %s", err))
 	}
-	return session
 }
 
 func CloseSession() {
