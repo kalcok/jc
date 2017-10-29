@@ -95,7 +95,7 @@ if err != nil {
 	panic(err)
 }
 ```
-\# TODO
+`Save()` takes one boolean argument which decide whether the action will [Clone](https://godoc.org/gopkg.in/mgo.v2#Session.Clone) (`true`) or [Copy](https://godoc.org/gopkg.in/mgo.v2#Session.Copy) (`false`) master session.
 
 ### Query
 \# TODO
