@@ -245,3 +245,30 @@ func TestUpsert(t *testing.T) {
 	}
 
 }
+
+func TestNewImplicitID(t *testing.T) {
+	doc := ImplicitID{Data: "TestNewID"}
+	jc.NewDocument(&doc)
+
+	originalID := doc.ID()
+	err := doc.NewImplicitID()
+	newID := doc.ID()
+
+	if err != nil {
+		t.Error("Failed to reinitialize new implicit ID: %s", err)
+	}
+	if originalID == newID {
+		t.Error("Failed to reinitialize new implicit ID: New ID matches old ID")
+	}
+}
+
+func TestNewImplicitIDError(t *testing.T) {
+	doc := ExplicitID{Data: "TestNewImplicitIDError"}
+	jc.NewDocument(&doc)
+
+	err := doc.NewImplicitID()
+
+	if err == nil {
+		t.Error("NewImplicitID() failed to return error when used on document with explicit ID")
+	}
+}
