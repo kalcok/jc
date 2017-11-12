@@ -96,6 +96,7 @@ if err != nil {
 }
 ```
 `Save()` takes one boolean argument which decide whether the action will [Clone](https://godoc.org/gopkg.in/mgo.v2#Session.Clone) (`true`) or [Copy](https://godoc.org/gopkg.in/mgo.v2#Session.Copy) (`false`) master session.
+Calling `Save()` multiple times on the same document works like Update, to insert new document instance into DB, documents ID must change. On documents that do not have explicit ID field, you can call `NewImplicitID` to generate new ID for the document
 
 ### Query
 \# TODO
