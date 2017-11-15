@@ -93,14 +93,26 @@ func (q *Query) Filter(filter interface{}) *Query {
 	return q
 }
 
+func (q *Query) GetFilter() interface{} {
+	return q.filter
+}
+
 func (q *Query) Limit(limit int) *Query {
 	q.limit = limit
 	return q
 }
 
+func (q *Query) GetLimit() int {
+	return q.limit
+}
+
 func (q *Query) Skip(skip int) *Query {
 	q.skip = skip
 	return q
+}
+
+func (q *Query) GetSkip() int {
+	return q.skip
 }
 
 func (q *Query) initResult() error {
