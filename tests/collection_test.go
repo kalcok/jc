@@ -7,10 +7,12 @@ import (
 	"github.com/kalcok/jc"
 	"gopkg.in/mgo.v2/bson"
 	"reflect"
+	"gopkg.in/mgo.v2"
 )
 
 var (
-	sessionDB string
+	sessionDB  string
+	mgoSession *mgo.Session
 )
 
 func initTestSession() {
@@ -42,9 +44,16 @@ func dropTestDB() {
 }
 
 func TestMain(m *testing.M) {
+	var err error
+	mgoSession, err = mgo.Dial("linux.dev")
+	if err != nil {
+		panic(err)
+	}
+	defer mgoSession.Clone()
 	initTestSession()
 	dropTestDB()
 	m.Run()
+	dropTestDB()
 }
 
 func TestSingleDocumentInit(t *testing.T) {
@@ -244,4 +253,31 @@ func TestUpsert(t *testing.T) {
 		t.Error("Failed to Upsert document")
 	}
 
+}
+
+func TestNewImplicitID(t *testing.T) {
+	doc := ImplicitID{Data: "TestNewID"}
+	jc.NewDocument(&doc)
+
+	originalID := doc.ID()
+	err := doc.NewImplicitID()
+	newID := doc.ID()
+
+	if err != nil {
+		t.Error("Failed to reinitialize new implicit ID: %s", err)
+	}
+	if originalID == newID {
+		t.Error("Failed to reinitialize new implicit ID: New ID matches old ID")
+	}
+}
+
+func TestNewImplicitIDError(t *testing.T) {
+	doc := ExplicitID{Data: "TestNewImplicitIDError"}
+	jc.NewDocument(&doc)
+
+	err := doc.NewImplicitID()
+
+	if err == nil {
+		t.Error("NewImplicitID() failed to return error when used on document with explicit ID")
+	}
 }

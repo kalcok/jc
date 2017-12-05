@@ -4,6 +4,7 @@ import (
 	"github.com/kalcok/jc"
 )
 
+// Test Fixtures
 type (
 	ImplicitID struct {
 		jc.Collection `bson:"-"json:"-"`
@@ -22,5 +23,23 @@ type (
 	ImplicitCollection struct {
 		jc.Collection `bson:"-"json:"-"`
 		Data string   `bson:"data"json:"data"`
+	}
+)
+
+// Benchmark Fixtures
+type (
+	simpleUserMGO struct {
+		name    string
+		surname string
+		address string
+		age     int
+	}
+
+	simpleUserJC struct {
+		jc.Collection
+		name    string
+		surname string
+		address string
+		age     int
 	}
 )

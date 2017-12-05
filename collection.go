@@ -21,6 +21,7 @@ type document interface {
 	Init(reflect.Value, reflect.Type)
 	InitDB() error
 	Info()
+	NewImplicitID() error
 	Save(bool) (*mgo.ChangeInfo, error)
 }
 
@@ -165,6 +166,15 @@ func (c *Collection) InitDB() error {
 	} else {
 		err = errors.New("database not initialized")
 	}
+	return err
+}
+
+func (c *Collection) NewImplicitID() (err error) {
+
+	if c._hasExplicitID {
+		return errors.New("can't assign new ID to document with Explicit ID")
+	}
+	c._implicitIDValue = bson.NewObjectId()
 	return err
 }
 
