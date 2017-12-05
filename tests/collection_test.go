@@ -7,10 +7,12 @@ import (
 	"github.com/kalcok/jc"
 	"gopkg.in/mgo.v2/bson"
 	"reflect"
+	"gopkg.in/mgo.v2"
 )
 
 var (
-	sessionDB string
+	sessionDB  string
+	mgoSession *mgo.Session
 )
 
 func initTestSession() {
@@ -42,9 +44,16 @@ func dropTestDB() {
 }
 
 func TestMain(m *testing.M) {
+	var err error
+	mgoSession, err = mgo.Dial("linux.dev")
+	if err != nil {
+		panic(err)
+	}
+	defer mgoSession.Clone()
 	initTestSession()
 	dropTestDB()
 	m.Run()
+	dropTestDB()
 }
 
 func TestSingleDocumentInit(t *testing.T) {
