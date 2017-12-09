@@ -23,6 +23,7 @@ type document interface {
 	Info()
 	NewImplicitID() error
 	Save(bool) (*mgo.ChangeInfo, error)
+	IsInitialized() bool
 }
 
 type Collection struct {
@@ -34,6 +35,7 @@ type Collection struct {
 	_explicitIDField string                `bson:"-"json:"-"`
 	_implicitIDValue bson.ObjectId         `bson:"-"json:"-"`
 	_skeleton        []reflect.StructField `bson:"-"json:"-"`
+	_initialized     bool                  `bson:"-",json:"-"`
 }
 
 func (c *Collection) setCollection(name string) {
@@ -51,6 +53,10 @@ func (c *Collection) SetDatabase(name string) {
 
 func (c *Collection) Database() string {
 	return c._collectionDB
+}
+
+func (c *Collection) IsInitialized() bool {
+	return c._initialized
 }
 
 func (c *Collection) Info() {
@@ -155,6 +161,7 @@ func (c *Collection) Init(parent reflect.Value, parentType reflect.Type) {
 		}
 		c._skeleton = append(c._skeleton, field)
 	}
+	c._initialized = true
 
 }
 
