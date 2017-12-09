@@ -281,3 +281,21 @@ func TestNewImplicitIDError(t *testing.T) {
 		t.Error("NewImplicitID() failed to return error when used on document with explicit ID")
 	}
 }
+
+func TestDocumentStartsUninitialized(t *testing.T) {
+	doc := ImplicitID{Data: "TestDocumentStartsUninitialized"}
+
+	if doc.IsInitialized() {
+		t.Error("IsInitialized returns true for uninitialized document")
+	}
+}
+
+func TestIsInitializedFlag(t *testing.T) {
+	doc := ImplicitID{Data: "TestIsInitializedFlag"}
+
+	jc.NewDocument(&doc)
+
+	if !doc.IsInitialized() {
+		t.Error("Initialization did not set _initialized flag")
+	}
+}
