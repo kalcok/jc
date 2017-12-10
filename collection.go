@@ -81,7 +81,6 @@ func (c *Collection) Save(reuseSocket bool) (info *mgo.ChangeInfo, err error) {
 	defer session.Close()
 
 	if c._hasExplicitID {
-		idField = c._explicitIDField
 		documentID = c._parent.Elem().FieldByName(c._explicitIDField).Interface()
 	} else if len(c._implicitIDValue) > 0 {
 		documentID = c._implicitIDValue
