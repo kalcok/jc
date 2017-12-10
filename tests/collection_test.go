@@ -250,9 +250,31 @@ func TestUpsert(t *testing.T) {
 	session.DB(sessionDB).C("implicit_i_d").FindId(id).One(&result)
 
 	if result["data"] != update {
-		t.Error("Failed to Upsert document")
+		t.Error("Failed to Upsert document with implicit ID")
 	}
 
+}
+
+func TestUpsertWithExplicitID(t *testing.T) {
+	original := "TestUpsertWithExplicitID"
+	updated := "TestUpsertWithExplicitIDUpdated"
+	id := 123
+	doc := ExplicitID{Data: original, MyID: id}
+	jc.NewDocument(&doc)
+
+	doc.Save(true)
+
+	doc.Data = updated
+	doc.Save(true)
+
+	result := bson.M{}
+	session, _ := tools.GetSessionClone()
+	defer session.Close()
+	session.DB(sessionDB).C(doc.CollectionName()).FindId(id).One(&result)
+
+	if result["data"] != updated {
+		t.Error("Failed to Upsert document with explicit ID")
+	}
 }
 
 func TestNewImplicitID(t *testing.T) {
